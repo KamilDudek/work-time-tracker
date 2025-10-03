@@ -18,6 +18,10 @@
 
     $sth2 = $conn->prepare("select projekt.id, projekt.nazwa, projekt.opis, projekt.zaakceptowano from projekt where zakonczono = ? order by projekt.zaakceptowano desc, projekt.nazwa asc");
     $sth2->execute([(isset($_GET['c']) ? 1 : 0)]);
+    
+    // Get all employees
+    $sth_employees = $conn->prepare("SELECT id, imie, nazwisko, id_skaner FROM pracownik ORDER BY nazwisko, imie");
+    $sth_employees->execute();
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -27,6 +31,7 @@
     <title>Admin Panel</title>
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="admin_panel.css">
+    <script src="admin_panel.js" defer></script>
 </head>
 <body>
     <div class="admin-panel-container">
@@ -74,6 +79,33 @@
             </section>
 
             <section class="admin-section">
+                <h2>Pracownicy</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Imię i Nazwisko</th>
+                            <th>ID Skanera</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                            while($employee = $sth_employees->fetch(PDO::FETCH_ASSOC)) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($employee['imie']) . " " . htmlspecialchars($employee['nazwisko']) . "</td>";
+                                echo "<td>" . htmlspecialchars($employee['id_skaner']) . "</td>";
+                                echo "<td class='action-buttons'>";
+                                echo "<a href='edit_employee.php?id=" . $employee['id'] . "' class='btn-edit'>Edytuj</a>";
+                                echo "<button onclick=\"confirmDelete('pracownika', " . $employee['id'] . ", '" . htmlspecialchars($employee['imie']) . " " . htmlspecialchars($employee['nazwisko']) . "')\" class='btn-delete'>Usuń</button>";
+                                echo "</td>";
+                                echo "</tr>";
+                            }
+                        ?>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="admin-section">
                 <h2>Projekty</h2>
                 <table class="admin-table">
                     <thead>
@@ -86,12 +118,14 @@
                         <?php
                             while($row = $sth2->fetch(PDO::FETCH_ASSOC)) {
                                 echo "<tr>";
-                                echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? " - " . $row['opis'] : "") . "</td>";
-                                echo "<td>";
-                                echo "<a href='akcja_zadania.php?" . (isset($_GET['c']) ? 'o' : 'z') . "&id=" . $row['id'] . "'>" . (isset($_GET['c']) ? 'Otwórz' : 'Archiwizuj') . "</a>";
+                                echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? " - " . htmlspecialchars($row['opis']) : "") . "</td>";
+                                echo "<td class='action-buttons'>";
+                                echo "<a href='edit_project.php?id=" . $row['id'] . "' class='btn-edit'>Edytuj</a>";
+                                echo "<button onclick=\"confirmDelete('projekt', " . $row['id'] . ", '" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? " - " . htmlspecialchars($row['opis']) : "") . "')\" class='btn-delete'>Usuń</button>";
+                                echo "<a href='akcja_zadania.php?" . (isset($_GET['c']) ? 'o' : 'z') . "&id=" . $row['id'] . "' class='btn-archive'>" . (isset($_GET['c']) ? 'Otwórz' : 'Archiwizuj') . "</a>";
                                 if ($row['zaakceptowano'] == 0) {
-                                    echo "<a href='akcja_zadania.php?a=1&id=" . $row['id'] . "'>Akceptuj</a>";
-                                    echo "<a href='akcja_zadania.php?n=1&id=" . $row['id'] . "'>Odrzuć</a>";
+                                    echo "<a href='akcja_zadania.php?a=1&id=" . $row['id'] . "' class='btn-approve'>Akceptuj</a>";
+                                    echo "<a href='akcja_zadania.php?n=1&id=" . $row['id'] . "' class='btn-reject'>Odrzuć</a>";
                                 }
                                 echo "</td>";
                                 echo "</tr>";
@@ -105,6 +139,18 @@
                 </footer>
             </section>
         </main>
+        
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2 id="modal-title">Usuń element</h2>
+                <p id="modal-message">Czy na pewno chcesz usunąć ten element?</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="btn-confirm">Tak, usuń</button>
+                    <button onclick="closeModal()" class="btn-cancel">Anuluj</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
