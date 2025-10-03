@@ -1,0 +1,12 @@
+Aby wejść na stronę administratora należy się udać na admin.php lub kliknąć przycisk na stronie index.php.
+Po wejściu na admin.php należy zalogować się oraz kliknąć enter.
+Następnie mamy opcję dodania pracownika po wpisaniu jego imienia, nazwiska oraz kodu którym będzie się logował.
+Można również dodać projekt poprzez dodanie jego numeru oraz opcjonalnego opisu.
+Obie akcje potwierdzamy przyciskiem dodaj lub kliknięciem enter na klawiaturze.
+Poniżej znajduje się tabelka projekty która wyświetla wszystkie projekty nad którymi ktoś pracuje.
+Opcja archiwizacji umożliwia zwiększenie przejrzystości przez archiwizowanie projektów które w najbliższym czasie nie będą wykonywane.
+Pod tym jest opcja przeglądania wszystkich danych z filtrami.
+Dane możemy filtrować po: pracowniku, projekcie lub datach.
+Jest opcja sortowania danych chronologicznie, rosnąco lub malejąco. 
+Tabela pojawi się dopiero po kliknięciu przycisku szukaj. 
+Jeżeli żadne filtry nie zostaną wybrane, zostaną pokazane wszystkie rekordy.

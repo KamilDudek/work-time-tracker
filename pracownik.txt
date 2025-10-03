@@ -1,0 +1,5 @@
+Wchodząc na stronę index.php klikamy w pole tekstowe i skanujemy swój kod kreskowy pracownika.
+Na stronie zadania.php mamy opcję wylogowania się w przypadku zeskanowania złego kodu.
+Poniżej skanujemy cyfry projektu oraz skanujemy typ pracy. 
+Po wpisaniu klikamy start aby zacząć pracować. 
+Po kliknięciu stop system zakańcza naszą pracę nad danym projektem. 
