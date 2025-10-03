@@ -1,0 +1,142 @@
+/* admin_panel.css */
+
+.admin-panel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.admin-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dddfe2;
+}
+
+.admin-panel-header h1 {
+    font-size: 1.8rem;
+    color: #1c1e21;
+}
+
+.admin-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-user-info span {
+    font-weight: 600;
+}
+
+.admin-user-info a {
+    color: #ff602b;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-user-info a:hover {
+    text-decoration: underline;
+}
+
+.admin-section {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.admin-section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.admin-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.admin-form .form-group {
+    flex: 1 1 200px;
+}
+
+.admin-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #dddfe2;
+    border-radius: 6px;
+}
+
+.btn-add {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #ff602b;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-add:hover {
+    background: #dd3b01;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dddfe2;
+}
+
+.admin-table th {
+    background: #f0f2f5;
+    font-weight: 600;
+}
+
+.admin-table td a {
+    color: #ff602b;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.admin-table td a:hover {
+    text-decoration: underline;
+}
+
+.admin-panel-footer {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.admin-panel-footer a {
+    color: #ff602b;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-weight: 600;
+}
+
+.admin-panel-footer a:hover {
+    text-decoration: underline;
+}

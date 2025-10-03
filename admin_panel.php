@@ -24,47 +24,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin</title>
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="admin_panel.css">
 </head>
 <body>
-    <nav><p>zalogowano jako <?= $_SESSION['admin'] ?></p><a href="przegladaj.php">filtrowanie</a><a href="logout.php">wyloguj</a></nav>
-<div class="dodaj1">
-    <h1>dodaj pracownika</h1>
-    <form method="post" action="dodaj.php">
-        <input type="text" name="imie" placeholder="imię" required/>
-        <input type="text" name="nazwisko" placeholder="nazwisko" required/>
-        <input type="text" name="id_skaner" placeholder="kod skanera" required pattern="\d{8}" maxlength="8" minlength="8" />
-        <button type="submit" name="b_pracownik">dodaj</button>
-    </form>
-</div>
-<div class="dodaj2">
-<h1>dodaj projekt</h1>
-<form method="post" action="dodaj.php">
-    <input type="number" name="nazwa" placeholder="numer" max="9999" required/>
-    <input type="text" name="opis" maxlength="64" placeholder="opis (opcjonalnie)"/>
-    <button type="submit" name="b_projekt">dodaj</button>
-</form>
-</div>
+    <div class="admin-panel-container">
+        <header class="admin-panel-header">
+            <h1>Panel Administratora</h1>
+            <div class="admin-user-info">
+                <span>Zalogowano jako <strong><?= $_SESSION['admin'] ?></strong></span>
+                <a href="logout.php">Wyloguj</a>
+            </div>
+        </header>
 
-    <h1>projekty</h1>
-    <table class="tabelka3">
-        <tr>
-            <th>projekt</th>
-            <th>akcja</th>
-        </tr>
-<?php
-    while($row = $sth2->fetch(PDO::FETCH_ASSOC)) {
-        echo "</td>";
-        echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? " - " . $row['opis'] : "") . "</td>";
-        echo "<td><a href='akcja_zadania.php?" . (isset($_GET['c']) ? 'o' : 'z') . "&id=" . $row['id'] . "'>" . (isset($_GET['c']) ? 'otwórz' : 'archiwizuj') . "</a>" . (($row['zaakceptowano'] == 0) ? " <a href='akcja_zadania.php?a=1&id=" . $row['id'] . "'>akceptuj</a> <a href='akcja_zadania.php?n=1&id=" . $row['id'] . "'>odrzuć</a>" : "")  . "</td>";
-        echo "</tr>";
-    }
-?>
-    </table>
-    <div class="tabelka">
-        <h2><a href="admin_panel.php<?= isset($_GET['c']) ? "" : "?c" ?>"><?= isset($_GET['c']) ? "pokaż otwarte projekty" : "pokaż archiwizowane projekty" ?> </a></h2>
-        <h2><a href="przegladaj.php">przeglądaj z filtrami</a></h2>
+        <main>
+            <section class="admin-section">
+                <h2>Dodaj Pracownika</h2>
+                <form method="post" action="dodaj.php" class="admin-form">
+                    <div class="form-group">
+                        <label for="imie">Imię</label>
+                        <input type="text" id="imie" name="imie" placeholder="Imię" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="nazwisko">Nazwisko</label>
+                        <input type="text" id="nazwisko" name="nazwisko" placeholder="Nazwisko" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_skaner">ID Skanera</label>
+                        <input type="text" id="id_skaner" name="id_skaner" placeholder="8-cyfrowy kod" required pattern="\d{8}" maxlength="8" minlength="8" />
+                    </div>
+                    <button type="submit" name="b_pracownik" class="btn-add">Dodaj</button>
+                </form>
+            </section>
+
+            <section class="admin-section">
+                <h2>Dodaj Projekt</h2>
+                <form method="post" action="dodaj.php" class="admin-form">
+                    <div class="form-group">
+                        <label for="nazwa">Numer Projektu</label>
+                        <input type="number" id="nazwa" name="nazwa" placeholder="Numer" max="9999" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="opis">Opis</label>
+                        <input type="text" id="opis" name="opis" maxlength="64" placeholder="Opcjonalny opis"/>
+                    </div>
+                    <button type="submit" name="b_projekt" class="btn-add">Dodaj</button>
+                </form>
+            </section>
+
+            <section class="admin-section">
+                <h2>Projekty</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Projekt</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                            while($row = $sth2->fetch(PDO::FETCH_ASSOC)) {
+                                echo "<tr>";
+                                echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? " - " . $row['opis'] : "") . "</td>";
+                                echo "<td>";
+                                echo "<a href='akcja_zadania.php?" . (isset($_GET['c']) ? 'o' : 'z') . "&id=" . $row['id'] . "'>" . (isset($_GET['c']) ? 'Otwórz' : 'Archiwizuj') . "</a>";
+                                if ($row['zaakceptowano'] == 0) {
+                                    echo "<a href='akcja_zadania.php?a=1&id=" . $row['id'] . "'>Akceptuj</a>";
+                                    echo "<a href='akcja_zadania.php?n=1&id=" . $row['id'] . "'>Odrzuć</a>";
+                                }
+                                echo "</td>";
+                                echo "</tr>";
+                            }
+                        ?>
+                    </tbody>
+                </table>
+                <footer class="admin-panel-footer">
+                    <a href="admin_panel.php<?= isset($_GET['c']) ? "" : "?c" ?>"><?= isset($_GET['c']) ? "Pokaż otwarte projekty" : "Pokaż zarchiwizowane projekty" ?></a>
+                    <a href="przegladaj.php">Przeglądaj z filtrami</a>
+                </footer>
+            </section>
+        </main>
     </div>
 </body>
 </html>

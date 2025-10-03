@@ -29,21 +29,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaloguj</title>
+    <title>Panel Administratora - Logowanie</title>
     <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-
-    <div class="adminnavv">
-        <h1>admin panel</h1>
-        <h2><a href="index.php" class="adminnav">powrót</a></h2>
+    <div class="admin-page">
+        <div class="admin-container">
+            <header class="admin-header">
+                <img src="http://www.dd-tech.pl/images/logo_min.png" alt="Logo" class="header-logo">
+                <h1>Panel Administratora</h1>
+                <p>Zaloguj się, aby zarządzać systemem</p>
+            </header>
+            <form method="post" class="admin-form">
+                <div class="form-group">
+                    <label for="login">Login</label>
+                    <input type="text" id="login" name="login" placeholder="Wprowadź login" required />
+                </div>
+                <div class="form-group">
+                    <label for="passwd">Hasło</label>
+                    <input type="password" id="passwd" name="passwd" placeholder="Wprowadź hasło" required />
+                </div>
+                <button type="submit" class="btn-admin-login">Zaloguj</button>
+            </form>
+            <footer class="admin-footer">
+                <a href="index.php">Powrót do logowania pracownika</a>
+            </footer>
+        </div>
     </div>
-
-    <form method="post" class="form-boxx">
-        <input type="text" name="login" placeholder="login"  reqiured />
-        <input type="password" name="passwd" placeholder="hasło" required />
-        <button type="submit">zaloguj</button>
-    </form>
-
 </body>
 </html>
