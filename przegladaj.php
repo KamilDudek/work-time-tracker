@@ -336,219 +336,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin</title>
+    <title>Przeglądanie Danych - System Czasu Pracy</title>
     <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="przegladaj.css">
 </head>
 <body>
-    <div class="misunia2">
-    <nav><p>zalogowano jako <?= $_SESSION['admin'] ?></p><a href="admin_panel.php">panel</a><a href="logout.php">wyloguj</a> </nav>
-    <div class="acojaktudammaxwidth"><h1>Filtrowanie danych czasu pracy</h1>
-    <form method="post">
-        <div class="filter-section">
-            <p><strong>Filtr po pracowniku:</strong></p>
-            <select name="pracownik">
-                <option value="">-- Wszyscy pracownicy --</option>
-<?php
-                $sth4 = $conn->prepare("SELECT * FROM pracownik WHERE usunieto = 0 ORDER BY nazwisko, imie");
-                $sth4->execute();
-                $pracownicy = $sth4->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($pracownicy as $pracownik) {
-                    echo "<option value='{$pracownik['id']}' " . (($f_pracownik == $pracownik['id']) ? 'selected' : '') . ">{$pracownik['imie']} {$pracownik['nazwisko']} (ID: {$pracownik['id_skaner']})</option>";
-                }
-?>
-            </select>
-        </div>
-        
-        <div class="filter-section">
-            <p><strong>Filtr po projekcie:</strong></p>
-            <select name="projekt">
-                <option value="">-- Wszystkie projekty --</option>
-<?php
-                $sth4 = $conn->prepare("SELECT * FROM projekt WHERE skasowano = 0 ORDER BY nazwa");
-                $sth4->execute();
-                $projekty = $sth4->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($projekty as $projekt) {
-                    echo "<option value='{$projekt['id']}' " . (($f_projekt == $projekt['id']) ? 'selected' : '') . ">" . format_project_number($projekt['nazwa']) . ($projekt['opis'] != "" ? " - " . $projekt['opis'] : "") . "</option>";
-                }
-?>
-            </select>
-        </div>
-        
-        <div class="filter-section">
-            <p><strong>Zakres dat:</strong></p>
-            <label>Od: <input type="date" name="data1" value="<?= (isset($f_data1) ? $f_data1 : "") ?>" /></label>
-            <label>Do: <input type="date" name="data2" value="<?= (isset($f_data2) ? $f_data2 : "") ?>" /></label>
-        </div>
-        
-        <div class="filter-section">
-            <p><strong>Sortowanie:</strong></p>
-            <select name="sort">
-                <option value="id" <?= $f_sort['id'] ?>>Chronologicznie</option>
-                <option value="pracownik" <?= $f_sort['pracownik'] ?>>Pracownik</option>
-                <option value="projekt" <?= $f_sort['projekt'] ?>>Projekt</option>
-                <option value="start" <?= $f_sort['start'] ?>>Data rozpoczęcia</option>
-                <option value="koniec" <?= $f_sort['koniec'] ?>>Data zakończenia</option>
-            </select>
-            <select name="sort2">
-                <option value="asc" <?= $f_sort2['asc'] ?>>Rosnąco</option>
-                <option value="desc" <?= $f_sort2['desc'] ?>>Malejąco</option>
-            </select>
-        </div>
-        
-        <div class="button-section">
-            <button type="submit" name="b_szukaj">🔍 Wyszukaj</button>
-            <button type="submit" name="b_no_filter">❌ Usuń filtry</button>
-        </div>
-        
-        <!-- Hidden fields to preserve search state for export -->
-        <input type="hidden" name="search_performed" value="<?= isset($_POST['b_szukaj']) || isset($_POST['b_export']) ? '1' : '0' ?>" />
-    </form>
-    
-    <!-- Separate form for export to preserve search parameters -->
-    <?php if((isset($_POST['b_szukaj']) || isset($_POST['b_export'])) && isset($sth) && $sth->rowCount() > 0): ?>
-    <form method="post" style="display: inline;">
-        <input type="hidden" name="pracownik" value="<?= htmlspecialchars($f_pracownik) ?>" />
-        <input type="hidden" name="projekt" value="<?= htmlspecialchars($f_projekt) ?>" />
-        <input type="hidden" name="data1" value="<?= htmlspecialchars($f_data1) ?>" />
-        <input type="hidden" name="data2" value="<?= htmlspecialchars($f_data2) ?>" />
-        <input type="hidden" name="sort" value="<?= htmlspecialchars($_POST['sort'] ?? 'id') ?>" />
-        <input type="hidden" name="sort2" value="<?= htmlspecialchars($_POST['sort2'] ?? 'asc') ?>" />
-        <button type="submit" name="b_export" style="background-color: #28a745; margin-left: 10px; padding: 0.75rem 1.5rem; color: white; border: none; border-radius: 4px; cursor: pointer;">📊 Eksportuj do CSV</button>
-    </form>
-    <?php endif; ?>
-    </form>
-    </div>
-    <div class="results-summary">
-<?php
-    if(isset($_POST['b_szukaj']) || (isset($_POST['search_performed']) && $_POST['search_performed'] == '1')) {
-        // If export was clicked, we need to re-run the search query to display results
-        if(isset($_POST['b_export'])) {
-            $display_harm = "SELECT 
-                TIMEDIFF(czas_pracy.zakonczenie, czas_pracy.poczatek) as czas_formatted,
-                czas_pracy.czas,
-                pracownik.imie, 
-                pracownik.nazwisko, 
-                czas_pracy.poczatek, 
-                czas_pracy.zakonczenie, 
-                projekt.nazwa, 
-                projekt.opis, 
-                projekt.id,
-                symbol.symbol as symbol_kod,
-                symbol.opis as symbol_opis,
-                czas_pracy.uwagi
-            FROM czas_pracy 
-            JOIN pracownik ON czas_pracy.id_pracownik = pracownik.id 
-            JOIN projekt ON czas_pracy.id_projekt = projekt.id 
-            JOIN symbol ON czas_pracy.id_symbol = symbol.id 
-            WHERE 1=1 ";
-            
-            $display_tokens = array();
-            
-            if(isset($_POST['pracownik']) && $_POST['pracownik'] != "") {
-                $display_harm .= "AND pracownik.id = ? ";
-                $display_tokens[] = $_POST['pracownik'];
-            }
-            if(isset($_POST['projekt']) && $_POST['projekt'] != "") {
-                $display_harm .= "AND projekt.id = ? ";
-                $display_tokens[] = $_POST['projekt'];
-            }
-            if(isset($_POST['data1']) && $_POST['data1'] != "") {
-                $display_harm .= "AND czas_pracy.poczatek >= ? ";
-                $display_tokens[] = $_POST['data1'] . " 00:00:00";
-            }
-            if(isset($_POST['data2']) && $_POST['data2'] != "") {
-                $display_harm .= "AND czas_pracy.zakonczenie <= ? ";
-                $display_tokens[] = $_POST['data2'] . " 23:59:59";
-            }
-            
-            $display_harm .= "ORDER BY czas_pracy.poczatek ASC";
-            
-            $sth = $conn->prepare($display_harm);
-            $sth->execute($display_tokens);
-        }
-        
-        if(isset($sth)) {
-            echo "<h3>📋 Wyniki wyszukiwania: {$sth->rowCount()} rekordów</h3>";
-            if($f_pracownik != 0) {
-                $worker_info = $conn->prepare("SELECT imie, nazwisko FROM pracownik WHERE id = ?");
-                $worker_info->execute([$f_pracownik]);
-                $worker = $worker_info->fetch(PDO::FETCH_ASSOC);
-                if($worker) {
-                    echo "<p><strong>Pracownik:</strong> {$worker['imie']} {$worker['nazwisko']}</p>";
-                }
-            }
-            if($f_projekt != 0) {
-                $project_info = $conn->prepare("SELECT nazwa, opis FROM projekt WHERE id = ?");
-                $project_info->execute([$f_projekt]);
-                $project = $project_info->fetch(PDO::FETCH_ASSOC);
-                if($project) {
-                    echo "<p><strong>Projekt:</strong> " . format_project_number($project['nazwa']) . ($project['opis'] ? " - " . $project['opis'] : "") . "</p>";
-                }
-            }
-            if($f_data1 != 0 || $f_data2 != 0) {
-                echo "<p><strong>Okres:</strong> ";
-                if($f_data1 != 0) echo "od " . $f_data1 . " ";
-                if($f_data2 != 0) echo "do " . $f_data2;
-                echo "</p>";
-            }
-        }
-    }
-?>
-    </div>
-</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>👤 Pracownik</th>
-                <th>📁 Projekt</th>
-                <th>🔧 Typ pracy</th>
-                <th>⏰ Rozpoczęcie</th>
-                <th>⏹️ Zakończenie</th>
-                <th>⏱️ Czas pracy</th>
-                <th>💬 Uwagi</th>
-            </tr>
-        </thead>
-        <tbody>
-<?php
-    $total_seconds = 0;
-    $total_hours = 0;
+    <div class="browse-container">
+        <header class="browse-header">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="http://www.dd-tech.pl/images/logo_min.png" alt="Logo" class="header-logo">
+                <h1>Przeglądanie Danych Czasu Pracy</h1>
+            </div>
+            <div class="browse-user-info">
+                <span>Zalogowano jako <strong><?= $_SESSION['admin'] ?></strong></span>
+                <a href="admin_panel.php">Panel</a>
+                <a href="logout.php">Wyloguj</a>
+            </div>
+        </header>
 
-    if(isset($_POST['b_szukaj']) || isset($_POST['b_export']) || (isset($_POST['search_performed']) && $_POST['search_performed'] == '1')) {
-        if(isset($sth) && $sth->rowCount() > 0) {
-            while($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-                // Calculate time for totals
-                if($row['zakonczenie'] != "" && $row['czas']) {
-                    $total_hours += floatval($row['czas']);
-                }
+        <section class="filters-section">
+            <h2>🔍 Filtry Wyszukiwania</h2>
+            <form method="post">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="pracownik">👤 Pracownik:</label>
+                        <select name="pracownik" id="pracownik">
+                            <option value="">-- Wszyscy pracownicy --</option>
+                            <?php
+                                $sth4 = $conn->prepare("SELECT * FROM pracownik WHERE usunieto = 0 ORDER BY nazwisko, imie");
+                                $sth4->execute();
+                                $pracownicy = $sth4->fetchAll(PDO::FETCH_ASSOC);
+                                foreach ($pracownicy as $pracownik) {
+                                    echo "<option value='{$pracownik['id']}' " . (($f_pracownik == $pracownik['id']) ? 'selected' : '') . ">{$pracownik['imie']} {$pracownik['nazwisko']} (ID: {$pracownik['id_skaner']})</option>";
+                                }
+                            ?>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="projekt">📁 Projekt:</label>
+                        <select name="projekt" id="projekt">
+                            <option value="">-- Wszystkie projekty --</option>
+                            <?php
+                                $sth4 = $conn->prepare("SELECT * FROM projekt WHERE skasowano = 0 ORDER BY nazwa");
+                                $sth4->execute();
+                                $projekty = $sth4->fetchAll(PDO::FETCH_ASSOC);
+                                foreach ($projekty as $projekt) {
+                                    echo "<option value='{$projekt['id']}' " . (($f_projekt == $projekt['id']) ? 'selected' : '') . ">" . format_project_number($projekt['nazwa']) . ($projekt['opis'] != "" ? " - " . $projekt['opis'] : "") . "</option>";
+                                }
+                            ?>
+                        </select>
+                    </div>
+                </div>
                 
-                echo "<tr>";
-                echo "<td>{$row['imie']} {$row['nazwisko']}</td>";
-                echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? "<br><small>" . htmlspecialchars($row['opis']) . "</small>" : "") . "</td>";
-                echo "<td><strong>{$row['symbol_kod']}</strong><br><small>" . htmlspecialchars($row['symbol_opis']) . "</small></td>";
-                echo "<td>" . date('Y-m-d H:i', strtotime($row['poczatek'])) . "</td>";
-                echo "<td>" . ($row['zakonczenie'] ? date('Y-m-d H:i', strtotime($row['zakonczenie'])) : '<span style="color: orange;">W trakcie</span>') . "</td>";
-                echo "<td><strong>" . ($row['czas_formatted'] ?: '-') . "</strong>" . ($row['czas'] ? "<br><small>(" . number_format($row['czas'], 1) . " h)</small>" : "") . "</td>";
-                echo "<td>" . ($row['uwagi'] ? htmlspecialchars($row['uwagi']) : '-') . "</td>";
-                echo "</tr>";
-            }
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>📅 Zakres dat:</label>
+                        <div class="date-range">
+                            <div>
+                                <label for="data1">Od:</label>
+                                <input type="date" name="data1" id="data1" value="<?= (isset($f_data1) ? $f_data1 : "") ?>" />
+                            </div>
+                            <div>
+                                <label for="data2">Do:</label>
+                                <input type="date" name="data2" id="data2" value="<?= (isset($f_data2) ? $f_data2 : "") ?>" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>📊 Sortowanie:</label>
+                        <div class="sort-controls">
+                            <div>
+                                <label for="sort">Sortuj według:</label>
+                                <select name="sort" id="sort">
+                                    <option value="id" <?= $f_sort['id'] ?>>Chronologicznie</option>
+                                    <option value="pracownik" <?= $f_sort['pracownik'] ?>>Pracownik</option>
+                                    <option value="projekt" <?= $f_sort['projekt'] ?>>Projekt</option>
+                                    <option value="start" <?= $f_sort['start'] ?>>Data rozpoczęcia</option>
+                                    <option value="koniec" <?= $f_sort['koniec'] ?>>Data zakończenia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sort2">Kierunek:</label>
+                                <select name="sort2" id="sort2">
+                                    <option value="asc" <?= $f_sort2['asc'] ?>>Rosnąco</option>
+                                    <option value="desc" <?= $f_sort2['desc'] ?>>Malejąco</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-controls">
+                    <button type="submit" name="b_szukaj" class="btn-search">🔍 Wyszukaj</button>
+                    <button type="submit" name="b_no_filter" class="btn-clear">❌ Usuń filtry</button>
+                    
+                    <!-- Hidden fields to preserve search state for export -->
+                    <input type="hidden" name="search_performed" value="<?= isset($_POST['b_szukaj']) || isset($_POST['b_export']) ? '1' : '0' ?>" />
+                </div>
+            </form>
             
-            // Summary row
-            if($total_hours > 0) {
-                $total_time_formatted = gmdate("H:i:s", $total_hours * 3600);
-                echo "<tr class='summary-row'>";
-                echo "<td colspan='5'><strong>PODSUMOWANIE CZASU PRACY:</strong></td>";
-                echo "<td><strong>{$total_time_formatted}</strong><br><small>(" . number_format($total_hours, 1) . " godzin)</small></td>";
-                echo "<td></td>";
-                echo "</tr>";
-            }
-        } else {
-            echo "<tr><td colspan='7' style='text-align: center; color: #666;'>❌ Brak wyników dla podanych kryteriów</td></tr>";
-        }
-    } else {
-        echo "<tr><td colspan='7' style='text-align: center; color: #666;'>🔍 Użyj filtrów powyżej, aby wyszukać dane</td></tr>";
-    }
-?>
-        </tbody>
-    </table>
+            <!-- Separate form for export to preserve search parameters -->
+            <?php if((isset($_POST['b_szukaj']) || isset($_POST['b_export'])) && isset($sth) && $sth->rowCount() > 0): ?>
+            <form method="post" style="display: inline;">
+                <input type="hidden" name="pracownik" value="<?= htmlspecialchars($f_pracownik) ?>" />
+                <input type="hidden" name="projekt" value="<?= htmlspecialchars($f_projekt) ?>" />
+                <input type="hidden" name="data1" value="<?= htmlspecialchars($f_data1) ?>" />
+                <input type="hidden" name="data2" value="<?= htmlspecialchars($f_data2) ?>" />
+                <input type="hidden" name="sort" value="<?= htmlspecialchars($_POST['sort'] ?? 'id') ?>" />
+                <input type="hidden" name="sort2" value="<?= htmlspecialchars($_POST['sort2'] ?? 'asc') ?>" />
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="submit" name="b_export" class="btn-export">📊 Eksportuj do CSV</button>
+                </div>
+            </form>
+            <?php endif; ?>
+        </section>
+
+        <section class="results-section">
+            <?php
+                if(isset($_POST['b_szukaj']) || (isset($_POST['search_performed']) && $_POST['search_performed'] == '1')) {
+                    // If export was clicked, we need to re-run the search query to display results
+                    if(isset($_POST['b_export'])) {
+                        $display_harm = "SELECT 
+                            TIMEDIFF(czas_pracy.zakonczenie, czas_pracy.poczatek) as czas_formatted,
+                            czas_pracy.czas,
+                            pracownik.imie, 
+                            pracownik.nazwisko, 
+                            czas_pracy.poczatek, 
+                            czas_pracy.zakonczenie, 
+                            projekt.nazwa, 
+                            projekt.opis, 
+                            projekt.id,
+                            symbol.symbol as symbol_kod,
+                            symbol.opis as symbol_opis,
+                            czas_pracy.uwagi
+                        FROM czas_pracy 
+                        JOIN pracownik ON czas_pracy.id_pracownik = pracownik.id 
+                        JOIN projekt ON czas_pracy.id_projekt = projekt.id 
+                        JOIN symbol ON czas_pracy.id_symbol = symbol.id 
+                        WHERE 1=1 ";
+                        
+                        $display_tokens = array();
+                        
+                        if(isset($_POST['pracownik']) && $_POST['pracownik'] != "") {
+                            $display_harm .= "AND pracownik.id = ? ";
+                            $display_tokens[] = $_POST['pracownik'];
+                        }
+                        if(isset($_POST['projekt']) && $_POST['projekt'] != "") {
+                            $display_harm .= "AND projekt.id = ? ";
+                            $display_tokens[] = $_POST['projekt'];
+                        }
+                        if(isset($_POST['data1']) && $_POST['data1'] != "") {
+                            $display_harm .= "AND czas_pracy.poczatek >= ? ";
+                            $display_tokens[] = $_POST['data1'] . " 00:00:00";
+                        }
+                        if(isset($_POST['data2']) && $_POST['data2'] != "") {
+                            $display_harm .= "AND czas_pracy.zakonczenie <= ? ";
+                            $display_tokens[] = $_POST['data2'] . " 23:59:59";
+                        }
+                        
+                        $display_harm .= "ORDER BY czas_pracy.poczatek ASC";
+                        
+                        $sth = $conn->prepare($display_harm);
+                        $sth->execute($display_tokens);
+                    }
+                    
+                    if(isset($sth)) {
+                        echo "<div class='results-summary'>";
+                        echo "<h3>📋 Wyniki wyszukiwania: {$sth->rowCount()} rekordów</h3>";
+                        if($f_pracownik != 0) {
+                            $worker_info = $conn->prepare("SELECT imie, nazwisko FROM pracownik WHERE id = ?");
+                            $worker_info->execute([$f_pracownik]);
+                            $worker = $worker_info->fetch(PDO::FETCH_ASSOC);
+                            if($worker) {
+                                echo "<p><strong>Pracownik:</strong> {$worker['imie']} {$worker['nazwisko']}</p>";
+                            }
+                        }
+                        if($f_projekt != 0) {
+                            $project_info = $conn->prepare("SELECT nazwa, opis FROM projekt WHERE id = ?");
+                            $project_info->execute([$f_projekt]);
+                            $project = $project_info->fetch(PDO::FETCH_ASSOC);
+                            if($project) {
+                                echo "<p><strong>Projekt:</strong> " . format_project_number($project['nazwa']) . ($project['opis'] ? " - " . $project['opis'] : "") . "</p>";
+                            }
+                        }
+                        if($f_data1 != 0 || $f_data2 != 0) {
+                            echo "<p><strong>Okres:</strong> ";
+                            if($f_data1 != 0) echo "od " . $f_data1 . " ";
+                            if($f_data2 != 0) echo "do " . $f_data2;
+                            echo "</p>";
+                        }
+                        echo "</div>";
+                    }
+                }
+            ?>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>👤 Pracownik</th>
+                        <th>📁 Projekt</th>
+                        <th>🔧 Typ pracy</th>
+                        <th>⏰ Rozpoczęcie</th>
+                        <th>⏹️ Zakończenie</th>
+                        <th>⏱️ Czas pracy</th>
+                        <th>💬 Uwagi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                    $total_seconds = 0;
+                    $total_hours = 0;
+
+                    if(isset($_POST['b_szukaj']) || isset($_POST['b_export']) || (isset($_POST['search_performed']) && $_POST['search_performed'] == '1')) {
+                        if(isset($sth) && $sth->rowCount() > 0) {
+                            while($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                                // Calculate time for totals
+                                if($row['zakonczenie'] != "" && $row['czas']) {
+                                    $total_hours += floatval($row['czas']);
+                                }
+                                
+                                echo "<tr>";
+                                echo "<td>{$row['imie']} {$row['nazwisko']}</td>";
+                                echo "<td>" . format_project_number($row['nazwa']) . ($row['opis'] != "" ? "<br><small>" . htmlspecialchars($row['opis']) . "</small>" : "") . "</td>";
+                                echo "<td><strong>{$row['symbol_kod']}</strong><br><small>" . htmlspecialchars($row['symbol_opis']) . "</small></td>";
+                                echo "<td>" . date('Y-m-d H:i', strtotime($row['poczatek'])) . "</td>";
+                                echo "<td>" . ($row['zakonczenie'] ? date('Y-m-d H:i', strtotime($row['zakonczenie'])) : '<span style="color: orange;">W trakcie</span>') . "</td>";
+                                echo "<td><strong>" . ($row['czas_formatted'] ?: '-') . "</strong>" . ($row['czas'] ? "<br><small>(" . number_format($row['czas'], 1) . " h)</small>" : "") . "</td>";
+                                echo "<td>" . ($row['uwagi'] ? htmlspecialchars($row['uwagi']) : '-') . "</td>";
+                                echo "</tr>";
+                            }
+                            
+                            // Summary row
+                            if($total_hours > 0) {
+                                $total_time_formatted = gmdate("H:i:s", $total_hours * 3600);
+                                echo "<tr class='summary-row'>";
+                                echo "<td colspan='5'><strong>PODSUMOWANIE CZASU PRACY:</strong></td>";
+                                echo "<td><strong>{$total_time_formatted}</strong><br><small>(" . number_format($total_hours, 1) . " godzin)</small></td>";
+                                echo "<td></td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='7' class='empty-state'><span class='icon'>❌</span>Brak wyników dla podanych kryteriów</td></tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='7' class='empty-state'><span class='icon'>🔍</span>Użyj filtrów powyżej, aby wyszukać dane</td></tr>";
+                    }
+                ?>
+                </tbody>
+            </table>
+        </section>
+    </div>
 </body>
 </html>

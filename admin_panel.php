@@ -36,10 +36,15 @@
 <body>
     <div class="admin-panel-container">
         <header class="admin-panel-header">
-            <h1>Panel Administratora</h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="http://www.dd-tech.pl/images/logo_min.png" alt="Logo" class="header-logo">
+                <h1>Panel Administratora</h1>
+            </div>
             <div class="admin-user-info">
                 <span>Zalogowano jako <strong><?= $_SESSION['admin'] ?></strong></span>
-                <a href="logout.php">Wyloguj</a>
+                <a href="admin_panel.php<?= isset($_GET['c']) ? "" : "?c" ?>" class="btn-nav"><?= isset($_GET['c']) ? "Otwarte projekty" : "Archiwizowane projekty" ?></a>
+                <a href="przegladaj.php" class="btn-nav">Przeglądaj z filtrami</a>
+                <a href="logout.php" class="btn-logout">Wyloguj</a>
             </div>
         </header>
 
@@ -133,10 +138,6 @@
                         ?>
                     </tbody>
                 </table>
-                <footer class="admin-panel-footer">
-                    <a href="admin_panel.php<?= isset($_GET['c']) ? "" : "?c" ?>"><?= isset($_GET['c']) ? "Pokaż otwarte projekty" : "Pokaż zarchiwizowane projekty" ?></a>
-                    <a href="przegladaj.php">Przeglądaj z filtrami</a>
-                </footer>
             </section>
         </main>
         
