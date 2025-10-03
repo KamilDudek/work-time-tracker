@@ -1,0 +1,94 @@
+/* admin.css */
+
+.admin-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.admin-container {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.admin-header .header-logo {
+    max-width: 150px;
+    margin-bottom: 1rem;
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    color: #1c1e21;
+    margin-bottom: 0.5rem;
+}
+
+.admin-header p {
+    color: #606770;
+    margin-bottom: 1.5rem;
+}
+
+.admin-form .form-group {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.admin-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.admin-form input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #dddfe2;
+    border-radius: 6px;
+    background: #f5f6f7;
+    margin-bottom: 1rem;
+}
+
+.admin-form input:focus {
+    outline: none;
+    border-color: #ff602b;
+    box-shadow: 0 0 0 2px rgba(255, 96, 43, 0.2);
+}
+
+.btn-admin-login {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #ff602b;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-admin-login:hover {
+    background: #dd3b01;
+}
+
+.admin-footer {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.admin-footer a {
+    color: #ff602b;
+    text-decoration: none;
+}
+
+.admin-footer a:hover {
+    text-decoration: underline;
+}

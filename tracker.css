@@ -1,0 +1,230 @@
+/* tracker.css */
+
+.app-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dddfe2;
+}
+
+.tracker-header .header-logo {
+    max-width: 150px;
+}
+
+.tracker-header h1 {
+  font-size: 1.8rem;
+  color: #1c1e21;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info strong {
+  color: #ff602b;
+}
+
+.btn-logout {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ff602b;
+  background: #fff;
+  border: 1px solid #ff602b;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  color: #fff;
+  background: #dd3b01;
+  border-color: #dd3b01;
+}
+
+.tracker-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.timer-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.project-selection h2 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.project-selection .form-group {
+  margin-bottom: 1rem;
+}
+
+.project-selection label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.project-selection input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #dddfe2;
+  border-radius: 6px;
+}
+
+.project-selection input:focus {
+  outline: none;
+  border-color: #ff602b;
+  box-shadow: 0 0 0 2px rgba(255, 96, 43, 0.2);
+}
+
+.timer-controls {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+#timer-display {
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: #1c1e21;
+  margin-bottom: 1.5rem;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+}
+
+.timer-controls button {
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0 0.5rem;
+}
+
+.btn-start {
+  color: #fff;
+  background: #28a745;
+}
+
+.btn-start:hover {
+  background: #218838;
+}
+
+.btn-start:disabled {
+  background: #a3d9b1;
+  cursor: not-allowed;
+}
+
+.btn-stop {
+  color: #fff;
+  background: #dc3545;
+}
+
+.btn-stop:hover {
+  background: #c82333;
+}
+
+.btn-stop:disabled {
+  background: #f8d7da;
+  cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 1.5rem;
+  color: #606770;
+}
+
+.modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #dddfe2;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modal-actions button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-confirm {
+  color: #fff;
+  background: #dc3545;
+}
+
+.btn-confirm:hover {
+  background: #c82333;
+}
+
+.btn-cancel {
+  color: #333;
+  background: #f0f2f5;
+  border: 1px solid #dddfe2;
+}
+
+.btn-cancel:hover {
+  background: #e2e6ea;
+}

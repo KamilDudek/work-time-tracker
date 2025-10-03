@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rejestracja Czasu Pracy</title>
-    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="tracker.css">
 </head>
 <body>
 <div class="app-container">
